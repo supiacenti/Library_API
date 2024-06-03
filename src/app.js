@@ -1,34 +1,28 @@
 import express from "express";
+import databaseConnection from "./config/dbconnect.js";
+import livro from "./models/Livro.js";
+
+const connection = await databaseConnection();
+
+connection.on("error", (err) => {
+    console.error("Connection Error", err);
+});
+
+connection.once("open", () => {
+    console.log("Successfull database connection")
+})
 
 const app = express();
-
-// executar em todas as requisições com body compatível com JSON, para que seja parseado JSON, já que todas vem em formato string
-app.use(express.json()); //middleware, para que tenha acesso as requisições e respostas quando estão sendo feitas para que sejam feitas alterações nelas
-
-const livros = [
-    {
-        id: 1,
-        titulo: "O Senhor dos Anéis"
-    },
-    {
-        id: 2,
-        titulo: "O Hobbit"
-    }
-]
-
-function buscaLivro(id) {
-    return livros.findIndex(livro => {
-        return livro.id === Number(id);
-    })
-}
+app.use(express.json());
 
 // Dá a responsabilidade de gerenciar e remanejar as rotas ao Express
 app.get("/", (req, res) => {
     res.status(200).send("Curso de Node");
 });
 
-app.get("/livros", (req, res) => {
-    res.status(200).json(livros);
+app.get("/livros", async (req, res) => {
+  const listaLivros = await livro.find({});
+  res.status(200).json(listaLivros);
 });
 
 app.post("/livros", (req, res) => {
@@ -54,5 +48,3 @@ app.delete("/livros/:id", (req, res) => {
 });
 
 export default app;
-
-//mongodb+srv://suellen:290102@library.llzqb6v.mongodb.net/?retryWrites=true&w=majority&appName=library
